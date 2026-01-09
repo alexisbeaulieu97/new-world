@@ -443,6 +443,8 @@ export class JSONStore {
   /**
    * Checks if a value exists at a nested path (is not undefined).
    *
+   * Note: Returns false if the path exists but the value is explicitly `undefined`.
+   *
    * @param {...(string | number)} keys - The path segments
    * @returns {boolean}
    *
@@ -452,7 +454,18 @@ export class JSONStore {
    * }
    */
   hasPath(...keys) {
-    return this.getPath(...keys) !== undefined;
+    this.#assertInitialized();
+    const validKeys = this.#validateKeys(keys);
+
+    /** @type {unknown} */
+    let current = this.#data;
+    for (const key of validKeys) {
+      if (current == null || typeof current !== "object") {
+        return false;
+      }
+      current = /** @type {Record<string | number, unknown>} */ (current)[key];
+    }
+    return current !== undefined;
   }
 
   /**
