@@ -432,6 +432,11 @@ export class JSONStore {
       }
       current = /** @type {Record<string | number, unknown>} */ (current)[key];
     }
+
+    // Clone objects/arrays to prevent mutation bypassing dirty tracking
+    if (current !== null && typeof current === "object") {
+      return structuredClone(current);
+    }
     return current;
   }
 
